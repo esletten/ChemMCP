@@ -3,7 +3,7 @@ import os
 from ...utils.base_tool import BaseTool
 from ...utils.errors import ChemMCPInputError, ChemMCPToolInitError
 from ...tool_utils.smiles import is_smiles
-from . import utils as pp_utils
+
 
 
 file_path = os.path.abspath(__file__)
@@ -68,6 +68,7 @@ class PropertyPredictor(BaseTool):
         super().__init__(init, interface=interface)
 
     def _init_modules(self):
+        from . import utils as pp_utils
         task_name = self.task_name
         cmd = pp_utils.construct_cmd(**MODEL_ARGS[task_name])
         self.args = pp_utils.parse_args(cmd)
@@ -88,5 +89,6 @@ class PropertyPredictor(BaseTool):
         loss_func = 'finetune_cross_entropy'
         if 'loss_func' in MODEL_ARGS[self.task_name]:
             loss_func = MODEL_ARGS[self.task_name]['loss_func']
+        from . import utils as pp_utils
         r = pp_utils.run_on_smiles(smiles, self.task_name, self.args, self.task, self.model, self.loss, task_num=task_num, loss_func=loss_func)
         return r

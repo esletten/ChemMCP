@@ -36,14 +36,17 @@ class PythonExecutor(BaseTool):
 
     def __init__(self, kernel_url: Optional[str] = None, init=True, interface='code'):
         kernel_url = kernel_url or os.getenv("JUPYTER_KERNEL_GATEWAY_URL", None)
-        self.jupyter = JupyterBackbone(kernel_url=kernel_url)
+        self.kernel_url = kernel_url
+        self.jupyter = None
         super().__init__(init, interface=interface)
 
     def __del__(self):
         if hasattr(self, 'jupyter') and self.jupyter:
             self.jupyter.close()
 
-    def _run_base(self, code: str) -> List[Union[str, Image]]:
+    def _run_base(self, code: str) -> str:
+        if self.jupyter is None:
+            self.jupyter = JupyterBackbone(kernel_url=self.kernel_url)
         msgs = self.jupyter.execute_jupyter(code)
 
         parts = []
@@ -71,7 +74,15 @@ class PythonExecutor(BaseTool):
                 tb = '\n'.join(content.get('traceback', []))
                 parts.append(tb)
         
-        return parts
+        # Convert all parts to strings
+        result_parts = []
+        for part in parts:
+            if isinstance(part, Image):
+                result_parts.append(f"[Image: {part.format.upper()}]")
+            else:
+                result_parts.append(str(part))
+        
+        return '\n'.join(result_parts)
 
 
 if __name__ == "__main__":

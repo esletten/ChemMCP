@@ -31,9 +31,12 @@ class MoleculePrice(BaseTool):
 
     def __init__(self, chemspace_api_key: Optional[str] = None, init=True, interface='code') -> None:
         chemspace_api_key = os.getenv("CHEMSPACE_API_KEY", None)
-        if chemspace_api_key is None:
+        if init and chemspace_api_key is None:
             raise ChemMCPApiNotFoundError("CHEMSPACE_API_KEY environment variable not set.")
-        self.chemspace = ChemSpace(chemspace_api_key)
+        if chemspace_api_key:
+            self.chemspace = ChemSpace(chemspace_api_key)
+        else:
+            self.chemspace = None
         super().__init__(init=init, interface=interface)
 
     def _run_base(self, smiles: str) -> str:

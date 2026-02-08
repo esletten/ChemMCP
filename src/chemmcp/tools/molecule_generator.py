@@ -1,4 +1,4 @@
-from transformers import T5Tokenizer, T5ForConditionalGeneration
+
 
 from ..utils.base_tool import BaseTool
 from ..utils.mcp_app import ChemMCPManager, run_mcp_server
@@ -33,6 +33,7 @@ class MoleculeGenerator(BaseTool):
         self.tokenizer, self.model = self.__load_molt5()
         
     def __load_molt5(self):
+        from transformers import T5Tokenizer, T5ForConditionalGeneration
         tokenizer = T5Tokenizer.from_pretrained("laituan245/molt5-large-caption2smiles", model_max_length=512)
         model = T5ForConditionalGeneration.from_pretrained('laituan245/molt5-large-caption2smiles')
         return tokenizer, model

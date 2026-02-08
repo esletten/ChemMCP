@@ -34,12 +34,17 @@ class WebSearch(BaseTool):
     def __init__(self, tavily_api_key: Optional[str] = None, init=True, interface='code'):
         if tavily_api_key is None:
             tavily_api_key = os.getenv("TAVILY_API_KEY", None)
-        if tavily_api_key is None:
+        if init and tavily_api_key is None:
             raise ChemMCPApiNotFoundError("Cannot find the API key for Tavily. Please set the TAVILY_API_KEY environment variable.")
-        self.client = TavilyClient(api_key=tavily_api_key)
+        if tavily_api_key:
+            self.client = TavilyClient(api_key=tavily_api_key)
+        else:
+            self.client = None
         super().__init__(init, interface=interface)
 
     def _run_base(self, query: str) -> str:
+        if self.client is None:
+             raise ChemMCPApiNotFoundError("Cannot find the API key for Tavily. Please set the TAVILY_API_KEY environment variable.")
         logger.info("Running WebSearch with query: %s", query)
         response = self.client.search(query, search_depth='advanced', include_answer=True)
         try:

@@ -1,11 +1,10 @@
 import importlib
 
-_tool_module_map = {
+TOOL_MODULE_MAP = {
     "WebSearch":    "web_search",
     "MoleculeCaptioner": "molecule_captioner",
     "MoleculeGenerator": "molecule_generator",
     "PubchemSearchQA": "pubchem_search_qa",
-    "PubchemSearch": "pubchem_search",  # Not registerred as an MCP tool
     "ForwardSynthesis": "forward_synthesis",
     "Retrosynthesis": "retrosynthesis",
     "MoleculeSimilarity": "molecule_similarity",
@@ -36,11 +35,11 @@ _tool_module_map = {
     "MoleculeVisualizer": "molecule_visualizer",
 }
 
-__all__ = list(_tool_module_map.keys())
+__all__ = list(TOOL_MODULE_MAP.keys())
 
 def __getattr__(name: str):
-    if name in _tool_module_map:
-        module_name = _tool_module_map.get(name)
+    if name in TOOL_MODULE_MAP:
+        module_name = TOOL_MODULE_MAP.get(name)
         if module_name is None:
             raise AttributeError(f"No mapping for tool {name!r} in chemmcp.tools")
         module = importlib.import_module(f"{__name__}.{module_name}")

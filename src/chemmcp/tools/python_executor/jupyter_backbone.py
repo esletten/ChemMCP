@@ -189,7 +189,11 @@ class JupyterBackbone:
 
         # Cleanup on exit/signals
         atexit.register(self.close)
-        for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        # SIGHUP is not available on Windows
+        signals = [signal.SIGINT, signal.SIGTERM]
+        if hasattr(signal, 'SIGHUP'):
+            signals.append(signal.SIGHUP)
+        for sig in signals:
             try:
                 signal.signal(sig, lambda s, f: self.close())
             except Exception:

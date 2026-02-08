@@ -47,8 +47,8 @@ class Iupac2Smiles(BaseTool):
         # If PubChem fails, try ChemSpace
         chemspace_api_key = os.getenv("CHEMSPACE_API_KEY", None)
         if not chemspace_api_key:
-            logger.debug("Looking up ChemSpace failed, because ChemSpace API is not set.")
-            raise ChemMCPApiNotFoundError("Cannot find the API key for ChemSpace. Please set the CHEMSPACE_API_KEY environment variable.")
+            logger.debug("Looking up ChemSpace skipped, because ChemSpace API is not set.")
+            raise ChemMCPSearchFailError('Cannot find a matched molecule/compound for the input IUPAC name from PubChem. ChemSpace lookup was skipped because CHEMSPACE_API_KEY is not set.') from e
         
         chemspace = ChemSpace(chemspace_api_key)
         tmp = chemspace.convert_mol_rep(iupac, "smiles")
@@ -61,7 +61,7 @@ class Iupac2Smiles(BaseTool):
             smi = None
 
         if smi is None:
-            raise ChemMCPSearchFailError('Cannot find a matched molecule/compound for the input IUPAC name from PubChem or ChemSpace. This may be because the input IUPAC name is not valid or the molecule is not in the databases. Please double check the input or try other tool.') from e
+            raise ChemMCPSearchFailError('Cannot find a matched molecule/compound for the input IUPAC name from PubChem or ChemSpace. Please double check the input or try other tool.') from e
         
         # If ChemSpace fails, try STOUT
         # TODO: The STOUT package is not available anymore. Should be fixed later.

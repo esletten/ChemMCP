@@ -3,13 +3,15 @@ import functools
 import inspect
 import logging
 from typing import List, Optional, Dict
+import importlib
 from mcp.server.fastmcp import FastMCP
 
 from .errors import catch_errors
+from ..tools import TOOL_MODULE_MAP
 
 logger = logging.getLogger(__name__)
 
-mcp_instance = FastMCP("ChemMCP", request_timeout=300)
+mcp_instance = FastMCP("ChemMCP")
 
 
 original_tool = mcp_instance.tool
@@ -39,21 +41,26 @@ class ChemMCPManager:
     
     @staticmethod
     def init_mcp_tools(mcp, tools: Optional[List[str]] = None):
-        registered_tool_names = set(ChemMCPManager.get_registered_tools())
+        available_tools = set(TOOL_MODULE_MAP.keys())
         
         if tools is None:
-            tools = registered_tool_names
+            tools = available_tools
         else:
             tools = set(tools)
             for tool_name in tools:
-                if tool_name not in registered_tool_names:
+                if tool_name not in available_tools:
                     raise ValueError(f"Tool '{tool_name}' does not exist.")
+        
+        # Import requested tools
+        for tool_name in tools:
+            module_name = TOOL_MODULE_MAP[tool_name]
+            importlib.import_module(f"chemmcp.tools.{module_name}")
                 
         num_tools = len(tools)
         for tool_name in tools:
             cls = ChemMCPManager._tools[tool_name]
 
-            inst = cls()
+            inst = cls(init=False)
 
             sig = inspect.signature(cls._run_base)
             params = list(sig.parameters.values())[1:]
